@@ -1,1 +1,0 @@
-murtaza@murtaza-pc.18367:1514764903
