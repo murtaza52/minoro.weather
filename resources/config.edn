@@ -1,0 +1,5 @@
+{:openweather {:api-key "4eb295eac46b0bec3ee898ed86e21b9e"
+               :current-weather-endpoint "http://api.openweathermap.org/data/2.5/group"
+               :current-weather-city-limit 20
+               :forecast-endpoint "http://api.openweathermap.org/data/2.5/forecast"}
+ :claypoole {:threadpool-size 10}}
