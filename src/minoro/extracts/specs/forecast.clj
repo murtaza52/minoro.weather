@@ -4,12 +4,12 @@
 
 (s/def ::name string?)
 
-(s/def ::unix-time utils/unix-time->sql-timestamp)
-(s/def ::iso-time utils/iso-time->sql-timestamp)
+(s/def ::unix-time #(utils/unix-time->sql-timestamp % 0))
+(s/def ::iso-time #(utils/iso-time->sql-timestamp % 0))
 
 (s/def ::speed number?)
 (s/def ::deg number?)
-(s/def ::wind (s/keys :req-un [::speed ::deg]))
+(s/def ::wind (s/keys :opt-un [::speed ::deg]))
 
 (s/def ::dt ::unix-time)
 

@@ -19,7 +19,7 @@
           (timbre/error data)
           (timbre/error e))))))
 
-(def reports-chan (async/chan 50))
+(def reports-chan (async/chan 3))
 
 (defstate reporting-proc
   :start (start-reporting-proc reports-chan)
@@ -32,7 +32,7 @@
 (defn filter-errors
   [resps]
   (let [grouped-resp (group-by :status resps)]
-    (when-let [non-200-resp (seq (dissoc grouped-resp :200))]
+    (when-let [non-200-resp (seq (dissoc grouped-resp 200))]
       ;; will not park or block
       (report-errors "Non 200 Responses while retrieving data" non-200-resp))
     (get-in grouped-resp [200])))

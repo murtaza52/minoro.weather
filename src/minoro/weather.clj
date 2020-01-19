@@ -3,7 +3,8 @@
             [mount.core :as mount]
             ;; for mount initialization
             [minoro.http]
-            [minoro.error-reporting]))
+            [minoro.error-reporting]
+            [minoro.s3]))
 
 ;; log uncaught exceptions in threads
 (Thread/setDefaultUncaughtExceptionHandler
@@ -31,5 +32,4 @@
 
 (comment
   (start-app :info)
-
   (stop-app))

@@ -7,12 +7,13 @@
             [minoro.utils :as utils]
             [clojure.spec.alpha :as s]
             [minoro.error-reporting :as mer]
-            [minoro.extracts.specs.forecast :as sft]))
+            [minoro.extracts.specs.forecast :as sft]
+            [minoro.s3 :as s3]))
 
 (def forecast-url (str (config/forecast-endpoint)
                               "?id=%s&units=metric&APPID=%s"))
 
-(def file-prefix "forecast")
+(def file-prefix "reports/forecast")
 
 (defn make-forecast-url
   [id]
@@ -33,9 +34,15 @@
 (comment
   (get-forecast-urls cities/cities))
 
+(defn generate-city-id
+  [city-name country-code city-id]
+  (str city-name "_" country-code "_" city-id) )
+
 (def columns
-  '[dt
-    forecast-dt
+  '[gen-city-id
+    dt
+    forecast-date
+    forecast-date-time
     city-name
     city-id
     country-code
@@ -72,8 +79,10 @@
     :as                               m}]
   (try
     (if (s/valid? ::sft/forecast-m m)
-      [(utils/unix-time->sql-timestamp dt)
-       (utils/iso-time->sql-timestamp forecast-dt)
+      [(generate-city-id city-name country-code city-id)
+       (utils/unix-time->sql-timestamp dt timezone)
+       (utils/iso-time->sql-date forecast-dt timezone)
+       (utils/iso-time->sql-timestamp forecast-dt timezone)
        city-name
        city-id
        country-code
@@ -103,29 +112,31 @@
 
 (defn process-responses
   [resps]
-  (cons
-   (map name columns)
-   (into [] (r/fold 20 r/cat r/append! (->> resps
-                                            (r/map :body)
-                                            (r/map #(cs/parse-string % true))
-                                            (r/mapcat add-city-meta)
-                                            (r/map process-resp)
-                                            (r/filter seq))))))
+  (into [] (r/fold 20 r/cat r/append! (->> resps
+                                           (r/map :body)
+                                           (r/map #(cs/parse-string % true))
+                                           (r/mapcat add-city-meta)
+                                           (r/map process-resp)
+                                           (r/filter seq)))))
 
-(defn retrieve-forecast-data*
-  [cities]
-  (->> cities
-       (sequence xget-forecast-urls)
-       get-data
-       process-responses
-       (utils/export-data (utils/get-file-name file-prefix))))
-
-(comment
-  (retrieve-forecast-data* [:paris-fr :london-gb]))
+(defn add-column-headers
+  [coll]
+  (cons (map name columns) coll))
 
 (defn retrieve-forecast-data
-  []
-  (retrieve-forecast-data* cities/cities))
+  [cities]
+  (let [file-name (utils/get-file-name file-prefix)]
+    (->> cities
+         get-forecast-urls
+         get-data
+         process-responses
+         add-column-headers
+         (utils/write-file file-name))
+    (s3/upload-file (:forecast (config/s3-buckets))
+                    file-name)))
+
+(comment
+  (retrieve-forecast-data [:paris-fr :london-gb]))
 
 (comment
   (def m {:sunset 1578929169,
@@ -153,4 +164,5 @@
           :country "GR"})
   (process-resp m)
   (s/explain ::sft/forecast-m m)
-  (retrieve-forecast-data))
+  (retrieve-forecast-data [:paris-fr :london-gb])
+  (retrieve-forecast-data cities/cities))
