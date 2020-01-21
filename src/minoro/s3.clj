@@ -17,14 +17,11 @@
 
 (defn upload-file
   [bucket-name file-name]
-  (let [r (aws/invoke s3-client {:op      :PutObject
-                                 :request {:Bucket               bucket-name
-                                           :ServerSideEncryption "AES256"
-                                           :Key                  file-name
-                                           :Body                 (mu/read-file file-name)}})]
-    (timbre/info (str "Uploaded file to bucket - " bucket-name))
-    (timbre/info r)
-    r))
+  (aws/invoke s3-client {:op      :PutObject
+                         :request {:Bucket               bucket-name
+                                   :ServerSideEncryption "AES256"
+                                   :Key                  file-name
+                                   :Body                 (mu/read-file file-name)}}))
 
 (comment
   (upload-file "forecast" "reports/forecast_2020-01-16T13:10:03.020.csv"))

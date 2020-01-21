@@ -1,48 +1,6 @@
 # minoro.weather
 
-FIXME: my new application.
-
-## Installation
-
-Download from https://github.com/minoro/minoro.weather.
-
-## Usage
-
-FIXME: explanation
-
-Run the project directly:
-
-    $ clojure -m minoro.weather
-
-Run the project's tests (they'll fail until you edit them):
-
-    $ clojure -A:test:runner
-
-Build an uberjar:
-
-    $ clojure -A:uberjar
-
-Run that uberjar:
-
-    $ java -jar minoro.weather.jar
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-f fs
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
+An application which shows data retrieval / massaging using clojure, retrieves and massages data from Open Weather API. Concurrent I/O using claypool, error reporting using core.async, data massaging using core.reducers and request preparation using transducers.
 
 ## Localstack
 

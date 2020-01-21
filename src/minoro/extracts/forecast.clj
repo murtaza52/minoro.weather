@@ -125,44 +125,19 @@
 
 (defn retrieve-forecast-data
   [cities]
+  (utils/log-info "Starting Extract: Forecast Weather")
   (let [file-name (utils/get-file-name file-prefix)]
     (->> cities
          get-forecast-urls
          get-data
          process-responses
          add-column-headers
+         (utils/log-info (str "Writing file: " file-name))
          (utils/write-file file-name))
-    (s3/upload-file (:forecast (config/s3-buckets))
-                    file-name)))
+    (utils/log-info "Uploading file to s3")
+    (utils/log-info (s3/upload-file (:forecast (config/s3-buckets))
+                                    file-name))))
 
 (comment
-  (retrieve-forecast-data [:paris-fr :london-gb]))
-
-(comment
-  (def m {:sunset 1578929169,
-          :coord {:lat 37.9795, :lon 23.7162},
-          :dt_txt "2020-01-13 18:00:00",
-          :timezone 7200,
-          :name "Athens",
-          :dt 1578938400,
-          :sunrise 1578894032,
-          :wind {:speed 2.68, :deg 11},
-          :id 264371,
-          :weather [{:id 800, :main "Clear", :description "clear sky", :icon "01n"}],
-          :clouds {:all 7},
-          :sys {:pod "n"},
-          :main
-          {:sea_level 1026,
-           :pressure 1026,
-           :temp 9.59,
-           :temp_max 9.71,
-           :temp_min 9.59,
-           :temp_kf -0.12,
-           :humidity 67,
-           :feels_like 6.35,
-           :grnd_level 1013},
-          :country "GR"})
-  (process-resp m)
-  (s/explain ::sft/forecast-m m)
   (retrieve-forecast-data [:paris-fr :london-gb])
   (retrieve-forecast-data cities/cities))

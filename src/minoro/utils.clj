@@ -69,6 +69,6 @@
   (iso-time->sql-date "2020-01-13 18:00:00" 7200))
 
 (defn log-info
-  [msg]
-  (timbre/info msg)
-  msg)
+  "Logger that can be used in threading macros"
+  ([msg] (timbre/info msg) msg)
+  ([msg v] (timbre/info msg) v))

@@ -8,8 +8,7 @@
             [clojure.spec.alpha :as s]
             [minoro.error-reporting :as mer]
             [minoro.extracts.specs.current-weather :as scw]
-            [minoro.s3 :as s3]
-            [taoensso.timbre :as timbre]))
+            [minoro.s3 :as s3]))
 
 (def current-weather-url (str (config/current-weather-endpoint)
                               "?id=%s&units=metric&APPID=%s"))
@@ -22,16 +21,13 @@
           (apply str ids)
           (config/openweather-api-key)))
 
-(make-current-weather-url [1 2])
+(comment (make-current-weather-url [1 2]))
 
 (def xget-current-weather-urls
   (comp (map cities/city->ids)
      (partition-all (config/current-weather-city-limit))
      (map #(interpose "," %))
      (map make-current-weather-url)))
-
-(comment
-  (sequence xget-current-weather-urls cities/cities))
 
 (defn get-current-weather-urls
   [cities]
@@ -124,7 +120,7 @@
 
 (defn retrieve-current-weather-data
   [cities]
-  (timbre/info "Starting Extract: Current Weather")
+  (utils/log-info "Starting Extract: Current Weather")
   (let [file-name (utils/get-file-name file-prefix)]
     (->> cities
          get-current-weather-urls
@@ -137,27 +133,6 @@
     (utils/log-info (s3/upload-file (:current-weather (config/s3-buckets))
                                     file-name))))
 
-
 (comment
-  (def m {:coord     {:lon 23.72, :lat 37.98},
-          :name       "Athens",
-          :dt         1578830944,
-          :wind       {:speed 3.6, :deg 330},
-          :id         264371,
-          :weather
-          [{:id 802, :main "Clouds", :description "scattered clouds", :icon "03d"}],
-          :clouds     {:all 40},
-          :sys
-          {:country "GR", :timezone 7200, :sunrise 1578807644, :sunset 1578842708},
-          :main
-          {:temp       13.01,
-           :feels_like 9.16,
-           :temp_min   11.11,
-           :temp_max   14.44,
-           :pressure   1023,
-           :humidity   "1"},
-           :visibility 10000})
-  (process-resp m)
-  (s/explain-str ::scw/current-weather-m m)
   (retrieve-current-weather-data [:paris-fr :london-gb])
   (retrieve-current-weather-data cities/cities))

@@ -10,7 +10,6 @@
          org.clojure/data.csv        {:mvn/version "0.1.4"}
          cheshire                    {:mvn/version "5.9.0"}
          clojure.java-time           {:mvn/version "0.3.2"}
-         amazonica                   {:mvn/version "0.3.152"}
          com.cognitect.aws/api       {:mvn/version "0.8.423"}
          com.cognitect.aws/endpoints {:mvn/version "1.1.11.710"}
          com.cognitect.aws/s3        {:mvn/version "784.2.593.0"}}
